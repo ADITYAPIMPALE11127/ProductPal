@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import ChatBubble from "./components/ChatBubble";
 import ChatInput from "./components/ChatInput";
+import ChatInstructions from "./components/ChatInstructions";
 import "./styles.css";
 
 function App() {
@@ -11,7 +12,6 @@ function App() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Scroll to the latest message
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -20,14 +20,9 @@ function App() {
     scrollToBottom();
   }, [messages]);
 
-  // Send user message to backend API
   const handleSend = async (msg) => {
     if (!msg.trim()) return;
-
-    // Add user message to chat
     setMessages(prev => [...prev, { text: msg, type: "user", images: [] }]);
-
-    // Show typing indicator
     setIsTyping(true);
 
     try {
@@ -37,11 +32,7 @@ function App() {
         body: JSON.stringify({ message: msg })
       });
 
-      // Handle non-200 responses
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`Server returned ${response.status}`);
       const data = await response.json();
 
       const botMessage = {
@@ -50,12 +41,10 @@ function App() {
         type: "bot"
       };
 
-      // Simulate typing delay
       setTimeout(() => {
         setMessages(prev => [...prev, botMessage]);
         setIsTyping(false);
       }, 500);
-
     } catch (error) {
       console.error("Error fetching backend:", error);
       setTimeout(() => {
@@ -70,7 +59,6 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Header */}
       <header className="app-header">
         <div className="header-content">
           <i className="fas fa-robot"></i>
@@ -78,33 +66,33 @@ function App() {
         </div>
       </header>
 
-      {/* Chat Container */}
-      <div className="chat-container">
-        <div className="messages">
-          {messages.map((msg, i) => (
-            <ChatBubble
-              key={i}
-              text={msg.text}
-              images={msg.images}
-              type={msg.type}
-            />
-          ))}
-          {isTyping && (
-            <div className="typing-indicator">
-              <div className="typing-bubble">
-                <span></span>
-                <span></span>
-                <span></span>
+      {/* Main Content: Chat + Instructions */}
+      <div className="main-content">
+        {/* Chat Section */}
+        <div className="chat-section">
+          <div className="messages">
+            {messages.map((msg, i) => (
+              <ChatBubble key={i} text={msg.text} images={msg.images} type={msg.type} />
+            ))}
+            {isTyping && (
+              <div className="typing-indicator">
+                <div className="typing-bubble">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
               </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-      {/* Input Area */}
-      <div className="input-container">
-        <ChatInput onSend={handleSend} />
+          <div className="input-container">
+            <ChatInput onSend={handleSend} />
+          </div>
+        </div>
+
+        {/* Instructions Sidebar */}
+        <ChatInstructions />
       </div>
     </div>
   );
