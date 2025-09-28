@@ -1,0 +1,5 @@
+# Backend-specific
+.env
+*.log
+backend/node_modules/
+backend/dist/
