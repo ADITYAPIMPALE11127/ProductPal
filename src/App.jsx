@@ -31,10 +31,11 @@ function App() {
 
     try {
       const response = await fetch("https://productpal-backend.onrender.com/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg })
-      });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ message: "test" })
+}).then(res => res.text()).then(console.log)
+
 
       const data = await response.json();
 
