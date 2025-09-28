@@ -1,3 +1,4 @@
+// App.jsx
 import { useState, useEffect, useRef } from "react";
 import ChatBubble from "./components/ChatBubble";
 import ChatInput from "./components/ChatInput";
@@ -31,18 +32,21 @@ function App() {
 
     try {
       const response = await fetch("https://productpal-backend.onrender.com/api/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ message: msg })
-}).then(res => res.text()).then(console.log)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+      });
 
+      // Handle non-200 responses
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
+      }
 
       const data = await response.json();
 
-      // Ensure backend returns { text: "...", images: ["..."] }
       const botMessage = {
-        text: data.text || "Sorry, I could not generate a response.",
-        images: data.images || [],
+        text: data?.text || "Sorry, I could not generate a response.",
+        images: data?.images || [],
         type: "bot"
       };
 
@@ -51,7 +55,9 @@ function App() {
         setMessages(prev => [...prev, botMessage]);
         setIsTyping(false);
       }, 500);
+
     } catch (error) {
+      console.error("Error fetching backend:", error);
       setTimeout(() => {
         setMessages(prev => [
           ...prev,
@@ -59,7 +65,6 @@ function App() {
         ]);
         setIsTyping(false);
       }, 500);
-      console.error(error);
     }
   };
 
@@ -80,7 +85,7 @@ function App() {
             <ChatBubble
               key={i}
               text={msg.text}
-              images={msg.images} // Pass images to ChatBubble
+              images={msg.images}
               type={msg.type}
             />
           ))}
